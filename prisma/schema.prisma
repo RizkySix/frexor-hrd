@@ -1,0 +1,55 @@
+// Prisma schema for the VAK Working Style Test app.
+//
+// Note: Prisma does not allow env() for the `provider` field — it must be a
+// literal string. We use `postgresql` for both local dev and production.
+// For local development, point DATABASE_URL at a free Neon branch
+// (https://neon.tech) or a local Postgres via Docker.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model HRDUser {
+  id         String      @id @default(cuid())
+  email      String      @unique
+  password   String
+  name       String
+  createdAt  DateTime    @default(now())
+  candidates Candidate[]
+}
+
+model Candidate {
+  id            String    @id @default(cuid())
+  name          String
+  position      String
+  token         String    @unique @default(cuid())
+  createdAt     DateTime  @default(now())
+  expiresAt     DateTime
+  submittedAt   DateTime?
+
+  scoreV        Int?
+  scoreA        Int?
+  scoreK        Int?
+  dominantStyle String?
+
+  answers       Answer[]
+  createdBy     String
+  hrd           HRDUser   @relation(fields: [createdBy], references: [id])
+
+  @@index([createdBy])
+}
+
+model Answer {
+  id          String    @id @default(cuid())
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  candidateId String
+  questionNo  Int
+  answer      String
+
+  @@unique([candidateId, questionNo])
+}
