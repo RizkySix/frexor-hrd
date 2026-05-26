@@ -10,11 +10,11 @@ export function isRSVPExpired(event: { eventAt: Date | string }): boolean {
   return Date.now() >= t.getTime();
 }
 
-const ID_TZ = "Asia/Jakarta"; // WIB (UTC+7)
+const ID_TZ = "Asia/Makassar"; // WITA (UTC+8) — Bali timezone
 
 export function formatEventDateTime(d: Date | string): string {
   const date = typeof d === "string" ? new Date(d) : d;
-  // Contoh: "Senin, 2 Juni 2025 • 09:00 WIB"
+  // Contoh: "Senin, 2 Juni 2025 • 09:00 WITA"
   const tanggal = date.toLocaleDateString("id-ID", {
     weekday: "long",
     day: "numeric",
@@ -27,7 +27,7 @@ export function formatEventDateTime(d: Date | string): string {
     minute: "2-digit",
     timeZone: ID_TZ,
   });
-  return `${tanggal} • ${jam} WIB`;
+  return `${tanggal} • ${jam} WITA`;
 }
 
 export function formatSubmittedAt(d: Date | string): string {
