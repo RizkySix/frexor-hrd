@@ -60,10 +60,15 @@ export default async function RSVPDetailPage({
           )}
         </div>
         <span
-          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
             expired ? "bg-gray-100 text-gray-600" : "bg-green-100 text-green-800"
           }`}
         >
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${
+              expired ? "bg-gray-400" : "bg-green-500"
+            }`}
+          />
           {expired ? "Ditutup" : "Aktif"}
         </span>
       </div>
@@ -71,7 +76,7 @@ export default async function RSVPDetailPage({
       <div className="mt-6 grid grid-cols-3 gap-3">
         <Stat label="Total Responden" value={event.responses.length} />
         <Stat label="Hadir" value={hadir} tone="green" />
-        <Stat label="Tidak Hadir" value={tidakHadir} tone="rose" />
+        <Stat label="Tidak Hadir" value={tidakHadir} tone="red" />
       </div>
 
       <div className="mt-6 flex items-center justify-between gap-3">
@@ -101,17 +106,21 @@ function Stat({
 }: {
   label: string;
   value: number;
-  tone?: "brand" | "green" | "rose";
+  tone?: "brand" | "green" | "red";
 }) {
-  const colors = {
-    brand: "text-brand-700",
-    green: "text-green-700",
-    rose: "text-rose-700",
-  };
+  const styles = {
+    brand: { num: "text-brand-700", dot: "bg-brand-500" },
+    green: { num: "text-green-700", dot: "bg-green-500" },
+    red: { num: "text-red-700", dot: "bg-red-500" },
+  } as const;
+  const s = styles[tone];
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="text-xs uppercase tracking-wider text-slate-500">{label}</div>
-      <div className={`mt-1 text-2xl font-semibold ${colors[tone]}`}>{value}</div>
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex items-center gap-1.5 text-xs uppercase tracking-wider text-slate-500">
+        <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
+        {label}
+      </div>
+      <div className={`mt-1 text-2xl font-semibold tabular-nums ${s.num}`}>{value}</div>
     </div>
   );
 }

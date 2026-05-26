@@ -133,9 +133,16 @@ export function RSVPForm({ token, event }: Props) {
   return (
     <main className="min-h-screen px-4 py-6">
       <div className="mx-auto max-w-md">
-        <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-xs uppercase tracking-wider text-brand-600">RSVP</p>
-          <h1 className="mt-1 text-xl font-semibold text-slate-900">{event.title}</h1>
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-[0.15em] text-brand-600">
+              Bali Sun Tours
+            </p>
+            <span className="inline-flex rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-brand-700">
+              RSVP
+            </span>
+          </div>
+          <h1 className="mt-3 text-xl font-semibold text-slate-900">{event.title}</h1>
           <p className="mt-1 text-sm text-slate-600">{event.eventAtFormatted}</p>
           {event.description && (
             <p className="mt-3 whitespace-pre-line text-sm text-slate-700">

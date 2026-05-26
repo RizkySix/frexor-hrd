@@ -80,7 +80,7 @@ export default function RSVPListPage() {
               return (
                 <div
                   key={ev.id}
-                  className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
+                  className="group rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-brand-200 hover:shadow-md"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -90,12 +90,17 @@ export default function RSVPListPage() {
                       </p>
                     </div>
                     <span
-                      className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
                         expired
                           ? "bg-gray-100 text-gray-600"
                           : "bg-green-100 text-green-800"
                       }`}
                     >
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${
+                          expired ? "bg-gray-400" : "bg-green-500"
+                        }`}
+                      />
                       {expired ? "Ditutup" : "Aktif"}
                     </span>
                   </div>
@@ -106,27 +111,32 @@ export default function RSVPListPage() {
                     </p>
                   )}
 
-                  <div className="mt-3 flex items-center gap-4 text-xs text-slate-700">
-                    <span>
-                      <span className="font-semibold text-slate-900">{ev.total}</span>{" "}
-                      Total
+                  <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-700">
+                      Total: <span className="font-semibold">{ev.total}</span>
                     </span>
-                    <span className="text-green-700">✅ {ev.hadir} Hadir</span>
-                    <span className="text-rose-700">❌ {ev.tidakHadir} Tidak</span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-1 font-medium text-green-800">
+                      <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                      Hadir: <span className="font-semibold">{ev.hadir}</span>
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 font-medium text-red-800">
+                      <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                      Tidak Hadir: <span className="font-semibold">{ev.tidakHadir}</span>
+                    </span>
                   </div>
 
-                  <div className="mt-4 flex items-center justify-end gap-2">
+                  <div className="mt-5 flex items-center justify-end gap-2">
                     {!expired && (
                       <button
                         onClick={() => copyLink(ev.token, ev.id)}
-                        className="rounded-md border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                        className="rounded-md border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
                       >
                         {copiedId === ev.id ? "Tersalin!" : "Salin Link"}
                       </button>
                     )}
                     <Link
                       href={`/dashboard/rsvp/${ev.id}`}
-                      className="rounded-md bg-brand-500 px-2.5 py-1 text-xs font-medium text-white hover:bg-brand-600"
+                      className="rounded-md bg-brand-500 px-2.5 py-1 text-xs font-medium text-white transition hover:bg-brand-600"
                     >
                       Lihat Detail
                     </Link>

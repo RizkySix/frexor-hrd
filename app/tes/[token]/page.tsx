@@ -1,9 +1,43 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { TestForm } from "./test-form";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { token: string };
+}): Promise<Metadata> {
+  const candidate = await prisma.candidate.findUnique({
+    where: { token: params.token },
+    select: { name: true, position: true },
+  });
+
+  const title = candidate
+    ? `Working Style Test untuk ${candidate.name}`
+    : "Working Style Test";
+  const description = candidate
+    ? `Halo ${candidate.name}, isi tes gaya kerja untuk posisi ${candidate.position} di Bali Sun Tours.`
+    : "Tes gaya kerja kandidat Bali Sun Tours.";
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title: `${title} — Bali Sun Tours`,
+      description,
+      type: "website",
+    },
+    twitter: {
+      card: "summary",
+      title: `${title} — Bali Sun Tours`,
+      description,
+    },
+  };
+}
 
 export default async function TestPage({ params }: { params: { token: string } }) {
   const candidate = await prisma.candidate.findUnique({

@@ -22,10 +22,18 @@ function statusOf(c: Candidate): Status {
   return "open";
 }
 
-const STATUS_LABEL: Record<Status, { text: string; cls: string }> = {
-  submitted: { text: "Sudah Mengisi", cls: "bg-emerald-100 text-emerald-700" },
-  open: { text: "Belum Mengisi", cls: "bg-amber-100 text-amber-700" },
-  expired: { text: "Expired", cls: "bg-slate-200 text-slate-600" },
+const STATUS_LABEL: Record<Status, { text: string; cls: string; dot: string }> = {
+  submitted: {
+    text: "Sudah Mengisi",
+    cls: "bg-emerald-100 text-emerald-700",
+    dot: "bg-emerald-500",
+  },
+  open: {
+    text: "Belum Mengisi",
+    cls: "bg-amber-100 text-amber-700",
+    dot: "bg-amber-500",
+  },
+  expired: { text: "Expired", cls: "bg-slate-200 text-slate-600", dot: "bg-slate-400" },
 };
 
 function formatDate(d: string) {
@@ -83,8 +91,9 @@ export function CandidateTable({ candidates }: { candidates: Candidate[] }) {
                   <td className="px-4 py-3 text-slate-600">{formatDate(c.createdAt)}</td>
                   <td className="px-4 py-3">
                     <span
-                      className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${label.cls}`}
+                      className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${label.cls}`}
                     >
+                      <span className={`h-1.5 w-1.5 rounded-full ${label.dot}`} />
                       {label.text}
                     </span>
                   </td>

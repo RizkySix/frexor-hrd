@@ -52,9 +52,20 @@ export function parseDropdownOptions(raw: unknown): DropdownOptions {
   return { label: obj.label, options: opts };
 }
 
-export const STATUS_LABEL: Record<RSVPStatus, { text: string; cls: string }> = {
-  HADIR: { text: "Hadir", cls: "bg-green-100 text-green-800" },
-  TIDAK_HADIR: { text: "Tidak Hadir", cls: "bg-red-100 text-red-800" },
+export const STATUS_LABEL: Record<
+  RSVPStatus,
+  { text: string; cls: string; dot: string }
+> = {
+  HADIR: {
+    text: "Hadir",
+    cls: "bg-green-100 text-green-800",
+    dot: "bg-green-500",
+  },
+  TIDAK_HADIR: {
+    text: "Tidak Hadir",
+    cls: "bg-red-100 text-red-800",
+    dot: "bg-red-500",
+  },
 };
 
 export function escapeCsv(value: string | null | undefined): string {

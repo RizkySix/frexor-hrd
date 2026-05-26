@@ -88,8 +88,9 @@ export function RSVPResponseTable({
                     )}
                     <td className="px-4 py-3">
                       <span
-                        className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${label.cls}`}
+                        className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${label.cls}`}
                       >
+                        <span className={`h-1.5 w-1.5 rounded-full ${label.dot}`} />
                         {label.text}
                       </span>
                     </td>

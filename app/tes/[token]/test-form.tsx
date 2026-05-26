@@ -75,7 +75,9 @@ export function TestForm({ token, candidate }: Props) {
         <div className="mx-auto max-w-2xl px-4 py-3 sm:px-6">
           <div className="flex items-center justify-between text-sm">
             <div>
-              <p className="text-xs uppercase tracking-wider text-brand-600">Frexor</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-brand-600">
+                Bali Sun Tours
+              </p>
               <p className="text-sm font-medium">Working Style Test</p>
             </div>
             <div className="text-right">
