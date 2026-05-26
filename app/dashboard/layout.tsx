@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { SignOutButton } from "./sign-out-button";
 import { DashboardTabs } from "./dashboard-tabs";
+
+export const metadata: Metadata = {
+  title: "Tes Gaya Kerja (VAK)",
+  description: "Kelola tes gaya kerja kandidat Bali Sun Tours.",
+};
 
 export default async function DashboardLayout({
   children,

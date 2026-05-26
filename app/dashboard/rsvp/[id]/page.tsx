@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
@@ -11,6 +12,22 @@ import {
 import { RSVPResponseTable } from "./response-table";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { id: string };
+}): Promise<Metadata> {
+  const event = await prisma.rSVPEvent.findUnique({
+    where: { id: params.id },
+    select: { title: true },
+  });
+  if (!event) return { title: "Event Tidak Ditemukan" };
+  return {
+    title: `RSVP · ${event.title}`,
+    description: `Rekap kehadiran untuk event "${event.title}" — Bali Sun Tours.`,
+  };
+}
 
 export default async function RSVPDetailPage({
   params,

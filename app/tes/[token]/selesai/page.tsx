@@ -1,9 +1,32 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { VAKChart } from "@/components/VAKChart";
 import { STYLE_DESCRIPTIONS, type Style } from "@/lib/scoring-key";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { token: string };
+}): Promise<Metadata> {
+  const candidate = await prisma.candidate.findUnique({
+    where: { token: params.token },
+    select: { name: true, dominantStyle: true },
+  });
+  const title = candidate
+    ? `Terima Kasih, ${candidate.name}`
+    : "Tes Selesai";
+  const description = candidate?.dominantStyle
+    ? `Hasil Working Style Test: ${candidate.dominantStyle}. Terima kasih sudah mengisi tes Bali Sun Tours.`
+    : "Tes gaya kerja telah selesai dikerjakan.";
+  return {
+    title,
+    description,
+    openGraph: { title: `${title} — Bali Sun Tours`, description, type: "website" },
+  };
+}
 
 export default async function FinishedPage({
   params,

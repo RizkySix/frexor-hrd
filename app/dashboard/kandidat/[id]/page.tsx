@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
@@ -8,6 +9,22 @@ import { STYLE_DESCRIPTIONS, type Style } from "@/lib/scoring-key";
 import { QUESTIONS } from "@/lib/questions";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { id: string };
+}): Promise<Metadata> {
+  const candidate = await prisma.candidate.findUnique({
+    where: { id: params.id },
+    select: { name: true, position: true },
+  });
+  if (!candidate) return { title: "Kandidat Tidak Ditemukan" };
+  return {
+    title: `Hasil VAK · ${candidate.name}`,
+    description: `Detail hasil tes gaya kerja ${candidate.name} (${candidate.position}).`,
+  };
+}
 
 export default async function CandidateDetailPage({
   params,

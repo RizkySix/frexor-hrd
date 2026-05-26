@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import {
@@ -8,6 +9,26 @@ import {
 } from "@/lib/rsvp-utils";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { token: string };
+}): Promise<Metadata> {
+  const event = await prisma.rSVPEvent.findUnique({
+    where: { token: params.token },
+    select: { title: true },
+  });
+  const title = event ? `RSVP Tersimpan · ${event.title}` : "RSVP Tersimpan";
+  const description = event
+    ? `RSVP untuk "${event.title}" telah tersimpan. Terima kasih dari Bali Sun Tours.`
+    : "RSVP Anda telah tersimpan.";
+  return {
+    title,
+    description,
+    openGraph: { title: `${title} — Bali Sun Tours`, description, type: "website" },
+  };
+}
 
 export default async function RSVPFinishedPage({
   params,
