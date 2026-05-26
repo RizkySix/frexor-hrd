@@ -157,14 +157,14 @@ export function RSVPForm({ token, event }: Props) {
         >
           <div>
             <label className="block text-sm font-medium text-slate-700">
-              Nama Lengkap *
+              Nama Anda *
             </label>
             <input
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-              placeholder="Nama lengkap Anda"
+              placeholder="Nama anda"
               autoComplete="name"
             />
           </div>
