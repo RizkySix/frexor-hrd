@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { SignOutButton } from "./sign-out-button";
+import { DashboardTabs } from "./dashboard-tabs";
 
 export default async function DashboardLayout({
   children,
@@ -18,7 +19,7 @@ export default async function DashboardLayout({
             <span className="text-sm font-bold uppercase tracking-wider text-brand-600">
               Frexor
             </span>
-            <span className="text-sm text-slate-500">VAK Working Style Test</span>
+            <span className="text-sm text-slate-500">HRD Console</span>
           </Link>
           <div className="flex items-center gap-3 text-sm">
             <span className="hidden text-slate-600 sm:inline">
@@ -26,6 +27,9 @@ export default async function DashboardLayout({
             </span>
             <SignOutButton />
           </div>
+        </div>
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <DashboardTabs />
         </div>
       </header>
 

@@ -15,12 +15,13 @@ datasource db {
 }
 
 model HRDUser {
-  id         String      @id @default(cuid())
-  email      String      @unique
+  id         String       @id @default(cuid())
+  email      String       @unique
   password   String
   name       String
-  createdAt  DateTime    @default(now())
+  createdAt  DateTime     @default(now())
   candidates Candidate[]
+  rsvpEvents RSVPEvent[]
 }
 
 model Candidate {
@@ -52,4 +53,34 @@ model Answer {
   answer      String
 
   @@unique([candidateId, questionNo])
+}
+
+model RSVPEvent {
+  id              String         @id @default(cuid())
+  title           String
+  description     String?
+  eventAt         DateTime
+  token           String         @unique @default(cuid())
+  dropdownOptions Json?
+  createdAt       DateTime       @default(now())
+
+  createdBy       String
+  hrd             HRDUser        @relation(fields: [createdBy], references: [id])
+  responses       RSVPResponse[]
+
+  @@index([createdBy])
+}
+
+model RSVPResponse {
+  id            String    @id @default(cuid())
+  event         RSVPEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId       String
+  name          String
+  dropdownValue String?
+  status        String
+  reason        String?
+  submittedAt   DateTime  @default(now())
+
+  @@index([eventId])
+  @@index([eventId, name])
 }
