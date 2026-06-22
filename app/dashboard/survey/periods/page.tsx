@@ -163,7 +163,7 @@ export default function SurveyPeriodsPage() {
           </h1>
           <p className="mt-1 text-sm text-slate-600">
             Atur kapan karyawan bisa mengakses form survey. Di luar periode aktif,
-            link <code>/survey</code> akan menampilkan pesan &ldquo;ditutup&rdquo;.
+            link <Link className="text-blue-500" href="https://talent.balisuntours.com/survey" target="__blank">https://talent.balisuntours.com/survey</Link> akan menampilkan pesan &ldquo;ditutup&rdquo;.
           </p>
         </div>
         <button
