@@ -15,13 +15,15 @@ datasource db {
 }
 
 model HRDUser {
-  id         String       @id @default(cuid())
-  email      String       @unique
-  password   String
-  name       String
-  createdAt  DateTime     @default(now())
-  candidates Candidate[]
-  rsvpEvents RSVPEvent[]
+  id                     String                 @id @default(cuid())
+  email                  String                 @unique
+  password               String
+  name                   String
+  createdAt              DateTime               @default(now())
+  candidates             Candidate[]
+  rsvpEvents             RSVPEvent[]
+  surveyAnalysisEdits    SurveyAnalysisResult[] @relation("SurveyAnalysisEditor")
+  surveyPeriods          SurveyPeriod[]
 }
 
 model Candidate {
@@ -83,4 +85,69 @@ model RSVPResponse {
 
   @@index([eventId])
   @@index([eventId, name])
+}
+
+enum SurveyAnalysisSource {
+  AI_WEBHOOK
+  MANUAL_HRD
+}
+
+model SurveyPeriod {
+  id          String             @id @default(cuid())
+  label       String
+  startsAt    DateTime
+  endsAt      DateTime
+  isActive    Boolean            @default(true)
+  createdAt   DateTime           @default(now())
+
+  createdBy   String
+  hrd         HRDUser            @relation(fields: [createdBy], references: [id])
+  submissions SurveySubmission[]
+
+  @@index([startsAt, endsAt])
+  @@index([isActive])
+}
+
+model SurveySubmission {
+  id              String        @id @default(cuid())
+  submittedAt     DateTime      @default(now())
+  answers         Json
+  textAnswers     Json
+  isProcessed     Boolean       @default(false)
+
+  // Periodic survey + anti-duplicate
+  periodId        String?
+  period          SurveyPeriod? @relation(fields: [periodId], references: [id])
+  // Hash dari random client token (cookie HttpOnly). Anonim — bukan IP, bukan user id.
+  // Unique per (periodId, clientTokenHash) → 1 submission per browser per periode.
+  clientTokenHash String?
+
+  @@index([isProcessed])
+  @@index([submittedAt])
+  @@index([periodId])
+  @@unique([periodId, clientTokenHash])
+}
+
+model SurveyAnalysisResult {
+  id               String               @id @default(cuid())
+  periodLabel      String
+  analysisPayload  Json
+  // { company_strengths: string[], top_improvement_areas: string[],
+  //   actionable_suggestions: string[], retention_sentiment: string|null,
+  //   retention_summary: string|null }
+  qualitativeData  Json?
+  // Raw per-section narrative dari AI — bentuknya tidak distandarisasi,
+  // ditampilkan apa adanya (read-only) di dashboard.
+  sectionAnalyses  Json?
+  summaryText      String?
+  overallAvg       Decimal              @db.Decimal(3, 2)
+  totalRespondents Int
+  generatedBy      SurveyAnalysisSource @default(AI_WEBHOOK)
+  generatedAt      DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  updatedByUserId  String?
+  updatedBy        HRDUser?             @relation("SurveyAnalysisEditor", fields: [updatedByUserId], references: [id])
+
+  @@index([generatedAt])
+  @@index([periodLabel])
 }

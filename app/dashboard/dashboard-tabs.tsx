@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const tabs = [
   { href: "/dashboard", label: "VAK Test", match: /^\/dashboard(\/kandidat.*)?$/ },
   { href: "/dashboard/rsvp", label: "RSVP Events", match: /^\/dashboard\/rsvp.*$/ },
+  { href: "/dashboard/survey", label: "Survey", match: /^\/dashboard\/survey.*$/ },
 ];
 
 export function DashboardTabs() {
