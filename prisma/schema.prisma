@@ -151,3 +151,32 @@ model SurveyAnalysisResult {
   @@index([generatedAt])
   @@index([periodLabel])
 }
+
+enum DriverGender {
+  MALE
+  FEMALE
+}
+
+enum DriverShirtSize {
+  S
+  M
+  L
+  XL
+  XXL
+  XXXL
+  XXXXL
+}
+
+model DriverSizeSubmission {
+  id               String           @id @default(cuid())
+  name             String
+  phone            String
+  phoneNormalized  String           @unique
+  gender           DriverGender
+  size             DriverShirtSize
+  submittedAt      DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@index([submittedAt])
+  @@index([size])
+}

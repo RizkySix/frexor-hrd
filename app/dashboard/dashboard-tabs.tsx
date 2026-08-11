@@ -7,6 +7,11 @@ const tabs = [
   { href: "/dashboard", label: "VAK Test", match: /^\/dashboard(\/kandidat.*)?$/ },
   { href: "/dashboard/rsvp", label: "RSVP Events", match: /^\/dashboard\/rsvp.*$/ },
   { href: "/dashboard/survey", label: "Survey", match: /^\/dashboard\/survey.*$/ },
+  {
+    href: "/dashboard/driver-sizes",
+    label: "Ukuran Baju",
+    match: /^\/dashboard\/driver-sizes.*$/,
+  },
 ];
 
 export function DashboardTabs() {
