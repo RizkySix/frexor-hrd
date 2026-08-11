@@ -100,14 +100,14 @@ export function DriverSizeForm() {
           htmlFor="driver-name"
           className="block text-sm font-medium text-slate-800"
         >
-          Nama Lengkap
+          Nama Sesuai Aplikasi
         </label>
         <input
           id="driver-name"
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Nama sesuai KTP"
+          placeholder="Lanus"
           maxLength={100}
           className={`mt-1.5 block w-full rounded-lg border px-3.5 py-3 text-base text-slate-900 focus:outline-none focus:ring-2 ${
             errors.name
