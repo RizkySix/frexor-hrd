@@ -180,3 +180,73 @@ model DriverSizeSubmission {
   @@index([submittedAt])
   @@index([size])
 }
+
+enum BloodType {
+  A
+  B
+  AB
+  O
+  UNKNOWN
+}
+
+enum Religion {
+  ISLAM
+  KRISTEN
+  KATOLIK
+  HINDU
+  BUDDHA
+  KONGHUCU
+  LAINNYA
+}
+
+enum MaritalStatus {
+  BELUM_KAWIN
+  KAWIN
+  CERAI_HIDUP
+  CERAI_MATI
+}
+
+enum LastEducation {
+  SD
+  SMP
+  SMA_SMK
+  D3
+  S1
+  S2
+  S3
+  LAINNYA
+}
+
+model DriverPartner {
+  id                     String         @id @default(cuid())
+  fullName               String
+  birthPlace             String
+  birthDate              DateTime
+  gender                 DriverGender
+  bloodType              BloodType
+  address                String         @db.Text
+  religion               Religion
+  maritalStatus          MaritalStatus
+  nik                    String         @unique
+  kkNumber               String
+  npwp                   String?
+  ptkpStatus             String?
+  bpjsKesehatan          String?
+  statusKesehatan        String?
+  bpjsKetenagakerjaan    String?
+  noRekening             String?
+  phone                  String
+  email                  String?
+  currentAddress         String?        @db.Text
+  lastEducation          LastEducation?
+  emergencyPhone         String?
+  roketAccountName       String?
+  workStartDate          DateTime?
+  ktpPhotoUrl            String
+  kkPhotoUrl             String
+  npwpPhotoUrl           String?
+  submittedAt            DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+
+  @@index([submittedAt])
+}

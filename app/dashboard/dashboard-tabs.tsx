@@ -12,6 +12,11 @@ const tabs = [
     label: "Ukuran Baju",
     match: /^\/dashboard\/driver-sizes.*$/,
   },
+  {
+    href: "/dashboard/driver-partners",
+    label: "Data Mitra",
+    match: /^\/dashboard\/driver-partners.*$/,
+  },
 ];
 
 export function DashboardTabs() {
