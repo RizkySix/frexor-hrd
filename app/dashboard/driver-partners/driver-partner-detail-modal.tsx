@@ -105,7 +105,7 @@ export function DriverPartnerDetailModal({ partner, onClose }: Props) {
                 label="Pendidikan Terakhir"
                 value={labelFor<LastEducation>(LAST_EDUCATION_OPTIONS, partner.lastEducation)}
               />
-              <Field label="Nama Panggung" value={display(partner.roketAccountName)} />
+              <Field label="Nama di Aplikasi" value={display(partner.roketAccountName)} />
               <Field label="Mulai Bekerja" value={formatDateOnly(partner.workStartDate)} />
               <Field label="Alamat Domisili" value={display(partner.currentAddress)} full />
             </Fields>

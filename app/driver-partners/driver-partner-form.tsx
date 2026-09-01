@@ -398,7 +398,7 @@ export function DriverPartnerForm() {
       e.emergencyPhone = "Nomor telepon kerabat wajib diisi.";
     }
     if (!formData.roketAccountName.trim()) {
-      e.roketAccountName = "Nama panggung wajib diisi.";
+      e.roketAccountName = "Nama Anda di aplikasi wajib diisi.";
     }
     if (!formData.workStartDate) {
       e.workStartDate = "Tanggal mulai bekerja wajib diisi (boleh perkiraan).";
@@ -1021,7 +1021,7 @@ export function DriverPartnerForm() {
 
         <div>
           <label htmlFor="dp-roketAccountName" className={labelCls}>
-            Nama Panggung Anda
+            Nama Anda di Aplikasi
           </label>
           <input
             id="dp-roketAccountName"
@@ -1035,7 +1035,7 @@ export function DriverPartnerForm() {
             <p className="mt-1.5 text-xs text-rose-600">{errors.roketAccountName}</p>
           )}
           <p className="mt-1.5 text-xs text-slate-500">
-            Nama panggung/alias yang Anda pakai di aplikasi Roket.
+            Nama/alias yang Anda pakai di aplikasi Roket.
           </p>
         </div>
 
