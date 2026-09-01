@@ -110,6 +110,16 @@ export const LAST_EDUCATION_LABELS: Record<LastEducation, string> = {
   LAINNYA: "Lainnya",
 };
 
+export const ALLOWED_IMAGE_CONTENT_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "image/heif",
+];
+
+export const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024;
+
 /**
  * Strip everything except digits from a raw string (NIK, KK, NPWP, phone, etc).
  */

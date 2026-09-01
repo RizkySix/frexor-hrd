@@ -1,36 +1,57 @@
 import { NextResponse } from "next/server";
-import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
+import { ALLOWED_IMAGE_CONTENT_TYPES, uploadObject } from "@/lib/s3";
 
-// Public route: drivers upload photos (KTP/KK/NPWP) directly from the
-// browser to Vercel Blob using a short-lived client token issued here.
-// This avoids relaying large image files through the serverless function
-// body (which is capped well below typical phone-camera photo sizes).
+const VALID_SLOTS = ["ktp", "kk", "npwp"];
+
+// Safety margin under typical serverless request-body limits. The client
+// compresses images before sending, so real uploads should land far below
+// this — this cap just guards against an uncompressed/oversized file.
+const MAX_BYTES = 8 * 1024 * 1024;
+
+// Public route: drivers upload their KTP/KK/NPWP photo here. The file is
+// relayed through our server to DigitalOcean Spaces (not a direct
+// browser-to-Spaces upload) because the Space has no working CORS policy for
+// cross-origin uploads.
 export async function POST(request: Request) {
-  const body = (await request.json()) as HandleUploadBody;
+  let form: FormData;
+  try {
+    form = await request.formData();
+  } catch {
+    return NextResponse.json({ error: "Data tidak valid." }, { status: 400 });
+  }
+
+  const slot = form.get("slot");
+  if (typeof slot !== "string" || !VALID_SLOTS.includes(slot)) {
+    return NextResponse.json({ error: "Slot dokumen tidak valid." }, { status: 400 });
+  }
+
+  const file = form.get("file");
+  if (!(file instanceof File)) {
+    return NextResponse.json({ error: "File tidak ditemukan." }, { status: 400 });
+  }
+
+  if (!ALLOWED_IMAGE_CONTENT_TYPES.includes(file.type)) {
+    return NextResponse.json(
+      { error: "Format file harus JPG, PNG, WEBP, atau HEIC." },
+      { status: 400 },
+    );
+  }
+
+  if (file.size > MAX_BYTES) {
+    return NextResponse.json(
+      { error: "Ukuran file terlalu besar. Maksimal 8MB." },
+      { status: 400 },
+    );
+  }
 
   try {
-    const jsonResponse = await handleUpload({
-      body,
-      request,
-      onBeforeGenerateToken: async () => ({
-        allowedContentTypes: [
-          "image/jpeg",
-          "image/png",
-          "image/webp",
-          "image/heic",
-          "image/heif",
-        ],
-        maximumSizeInBytes: 10 * 1024 * 1024,
-        addRandomSuffix: true,
-      }),
-      onUploadCompleted: async () => {},
-    });
-
-    return NextResponse.json(jsonResponse);
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    const { publicUrl } = await uploadObject(slot, file.name, file.type, bytes);
+    return NextResponse.json({ publicUrl });
   } catch (error) {
     return NextResponse.json(
-      { error: (error as Error).message },
-      { status: 400 },
+      { error: (error as Error).message ?? "Gagal mengunggah file." },
+      { status: 500 },
     );
   }
 }

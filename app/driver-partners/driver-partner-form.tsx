@@ -7,11 +7,11 @@ import {
   type ChangeEvent,
   type FormEvent,
 } from "react";
-import { upload } from "@vercel/blob/client";
 import {
   BLOOD_TYPE_OPTIONS,
   LAST_EDUCATION_OPTIONS,
   MARITAL_STATUS_OPTIONS,
+  MAX_UPLOAD_SIZE_BYTES,
   PTKP_OPTIONS,
   RELIGION_OPTIONS,
   isValidKk,
@@ -26,6 +26,40 @@ import {
 import { GENDER_OPTIONS, type DriverGender } from "@/lib/driver-size-utils";
 
 const DRAFT_KEY = "driver-partner-draft-v1";
+
+const COMPRESS_MAX_DIMENSION = 1920;
+const COMPRESS_JPEG_QUALITY = 0.82;
+
+// Resize/re-encode a photo client-side before upload so phone-camera photos
+// (often 5-10MB) shrink to a few hundred KB while staying legible for
+// document verification. Falls back to the original file if the browser
+// can't decode it (e.g. some HEIC cases) — the server still enforces a size
+// cap either way.
+async function compressImage(file: File): Promise<File> {
+  try {
+    const bitmap = await createImageBitmap(file);
+    let { width, height } = bitmap;
+    if (width > COMPRESS_MAX_DIMENSION || height > COMPRESS_MAX_DIMENSION) {
+      const scale = COMPRESS_MAX_DIMENSION / Math.max(width, height);
+      width = Math.round(width * scale);
+      height = Math.round(height * scale);
+    }
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    ctx.drawImage(bitmap, 0, 0, width, height);
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob((b) => resolve(b), "image/jpeg", COMPRESS_JPEG_QUALITY),
+    );
+    if (!blob) return file;
+    const newName = file.name.replace(/\.[^.]+$/, "") + ".jpg";
+    return new File([blob], newName, { type: "image/jpeg" });
+  } catch {
+    return file;
+  }
+}
 
 type FormData = {
   fullName: string;
@@ -244,10 +278,26 @@ export function DriverPartnerForm() {
     });
 
     try {
-      const blob = await upload(`driver-partners/${slot}/${file.name}`, file, {
-        access: "public",
-        handleUploadUrl: "/api/driver-partners/upload",
+      if (file.size > MAX_UPLOAD_SIZE_BYTES) {
+        throw new Error("Ukuran file maksimal 10MB.");
+      }
+
+      const compressed = await compressImage(file);
+
+      const form = new FormData();
+      form.append("slot", slot);
+      form.append("file", compressed);
+
+      const res = await fetch("/api/driver-partners/upload", {
+        method: "POST",
+        body: form,
       });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error ?? "Gagal mengunggah file.");
+      }
+
+      const publicUrl: string = data.publicUrl;
       setPhotos((prev) => {
         const old = prev[slot];
         if (old.previewUrl?.startsWith("blob:")) {
@@ -257,8 +307,8 @@ export function DriverPartnerForm() {
           ...prev,
           [slot]: {
             status: "success",
-            url: blob.url,
-            previewUrl: blob.url,
+            url: publicUrl,
+            previewUrl: publicUrl,
             error: null,
           },
         };
