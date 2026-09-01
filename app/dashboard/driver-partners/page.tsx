@@ -127,7 +127,7 @@ export default function DriverPartnersPage() {
             href="/api/driver-partners/export"
             className="rounded-md bg-brand-500 px-4 py-2 text-sm font-medium text-white shadow hover:bg-brand-600"
           >
-            Export CSV
+            Export Excel
           </a>
         </div>
       </div>
