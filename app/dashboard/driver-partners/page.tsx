@@ -26,18 +26,16 @@ export type DriverPartner = {
   nik: string;
   kkNumber: string;
   npwp: string | null;
-  ptkpStatus: string | null;
-  bpjsKesehatan: string | null;
-  statusKesehatan: string | null;
-  bpjsKetenagakerjaan: string | null;
+  ptkpStatus: string;
   noRekening: string | null;
   phone: string;
-  email: string | null;
+  email: string;
   currentAddress: string | null;
   lastEducation: LastEducation | null;
-  emergencyPhone: string | null;
-  roketAccountName: string | null;
-  workStartDate: string | null;
+  emergencyName: string;
+  emergencyPhone: string;
+  roketAccountName: string;
+  workStartDate: string;
   ktpPhotoUrl: string;
   kkPhotoUrl: string;
   npwpPhotoUrl: string | null;
@@ -114,7 +112,7 @@ export default function DriverPartnersPage() {
         <div>
           <h1 className="text-2xl font-semibold text-slate-900">Data Mitra Driver</h1>
           <p className="mt-1 text-sm text-slate-600">
-            Data resmi mitra driver (KTP, KK, NPWP, BPJS, dan data lain) yang
+            Data resmi mitra driver (KTP, KK, NPWP, dan data lain) yang
             dikumpulkan untuk keperluan administrasi HRD.
           </p>
         </div>

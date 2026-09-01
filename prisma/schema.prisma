@@ -230,18 +230,16 @@ model DriverPartner {
   nik                    String         @unique
   kkNumber               String
   npwp                   String?
-  ptkpStatus             String?
-  bpjsKesehatan          String?
-  statusKesehatan        String?
-  bpjsKetenagakerjaan    String?
+  ptkpStatus             String
   noRekening             String?
   phone                  String
-  email                  String?
+  email                  String
   currentAddress         String?        @db.Text
   lastEducation          LastEducation?
-  emergencyPhone         String?
-  roketAccountName       String?
-  workStartDate          DateTime?
+  emergencyName          String
+  emergencyPhone         String
+  roketAccountName       String
+  workStartDate          DateTime
   ktpPhotoUrl            String
   kkPhotoUrl             String
   npwpPhotoUrl           String?

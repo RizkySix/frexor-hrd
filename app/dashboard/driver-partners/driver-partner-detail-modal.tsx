@@ -82,13 +82,10 @@ export function DriverPartnerDetailModal({ partner, onClose }: Props) {
             </Fields>
           </Section>
 
-          <Section title="Data Pajak & BPJS">
+          <Section title="Data Pajak">
             <Fields>
               <Field label="NPWP" value={display(partner.npwp)} mono />
               <Field label="Status PTKP" value={display(partner.ptkpStatus)} />
-              <Field label="BPJS Kesehatan" value={display(partner.bpjsKesehatan)} mono />
-              <Field label="Status Kesehatan" value={display(partner.statusKesehatan)} />
-              <Field label="BPJS Ketenagakerjaan" value={display(partner.bpjsKetenagakerjaan)} mono />
             </Fields>
           </Section>
 
@@ -102,6 +99,7 @@ export function DriverPartnerDetailModal({ partner, onClose }: Props) {
             <Fields>
               <Field label="No. HP" value={display(partner.phone)} />
               <Field label="Email" value={display(partner.email)} />
+              <Field label="Nama Kerabat" value={display(partner.emergencyName)} />
               <Field label="No. HP Darurat" value={display(partner.emergencyPhone)} />
               <Field
                 label="Pendidikan Terakhir"

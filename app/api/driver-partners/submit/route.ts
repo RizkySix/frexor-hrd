@@ -4,6 +4,7 @@ import {
   BLOOD_TYPE_OPTIONS,
   LAST_EDUCATION_OPTIONS,
   MARITAL_STATUS_OPTIONS,
+  PTKP_OPTIONS,
   RELIGION_OPTIONS,
   isValidKk,
   isValidNik,
@@ -29,14 +30,12 @@ type Body = {
   kkNumber?: unknown;
   npwp?: unknown;
   ptkpStatus?: unknown;
-  bpjsKesehatan?: unknown;
-  statusKesehatan?: unknown;
-  bpjsKetenagakerjaan?: unknown;
   noRekening?: unknown;
   phone?: unknown;
   email?: unknown;
   currentAddress?: unknown;
   lastEducation?: unknown;
+  emergencyName?: unknown;
   emergencyPhone?: unknown;
   roketAccountName?: unknown;
   workStartDate?: unknown;
@@ -63,6 +62,8 @@ function optionalStr(value: unknown): string | null {
   const v = str(value);
   return v === "" ? null : v;
 }
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function parseDate(value: unknown): Date | null {
   const v = str(value);
@@ -192,10 +193,32 @@ export async function POST(request: Request) {
   }
   const npwp = npwpRaw ? normalizeDigits(npwpRaw) : null;
 
+  const ptkpStatus = str(body.ptkpStatus);
+  if (!ptkpStatus || !PTKP_OPTIONS.includes(ptkpStatus)) {
+    return NextResponse.json(
+      { error: "Status PTKP wajib dipilih." },
+      { status: 400 },
+    );
+  }
+
   const phone = str(body.phone);
   if (!phone) {
     return NextResponse.json(
       { error: "Nomor telepon/HP wajib diisi." },
+      { status: 400 },
+    );
+  }
+
+  const email = str(body.email);
+  if (!email) {
+    return NextResponse.json(
+      { error: "Alamat email wajib diisi." },
+      { status: 400 },
+    );
+  }
+  if (!EMAIL_RE.test(email)) {
+    return NextResponse.json(
+      { error: "Format alamat email tidak valid." },
       { status: 400 },
     );
   }
@@ -212,7 +235,37 @@ export async function POST(request: Request) {
     lastEducation = lastEducationRaw as LastEducation;
   }
 
+  const emergencyName = str(body.emergencyName);
+  if (!emergencyName) {
+    return NextResponse.json(
+      { error: "Nama kerabat wajib diisi." },
+      { status: 400 },
+    );
+  }
+
+  const emergencyPhone = str(body.emergencyPhone);
+  if (!emergencyPhone) {
+    return NextResponse.json(
+      { error: "Nomor telepon kerabat wajib diisi." },
+      { status: 400 },
+    );
+  }
+
+  const roketAccountName = str(body.roketAccountName);
+  if (!roketAccountName) {
+    return NextResponse.json(
+      { error: "Nama akun di Roket wajib diisi." },
+      { status: 400 },
+    );
+  }
+
   const workStartDate = parseDate(body.workStartDate);
+  if (!workStartDate) {
+    return NextResponse.json(
+      { error: "Tanggal mulai bekerja wajib diisi (boleh perkiraan)." },
+      { status: 400 },
+    );
+  }
 
   const ktpPhotoUrl = str(body.ktpPhotoUrl);
   if (!ktpPhotoUrl) {
@@ -243,17 +296,15 @@ export async function POST(request: Request) {
     maritalStatus: maritalStatus as MaritalStatus,
     kkNumber,
     npwp,
-    ptkpStatus: optionalStr(body.ptkpStatus),
-    bpjsKesehatan: optionalStr(body.bpjsKesehatan),
-    statusKesehatan: optionalStr(body.statusKesehatan),
-    bpjsKetenagakerjaan: optionalStr(body.bpjsKetenagakerjaan),
+    ptkpStatus,
     noRekening: optionalStr(body.noRekening),
     phone,
-    email: optionalStr(body.email),
+    email,
     currentAddress: optionalStr(body.currentAddress),
     lastEducation,
-    emergencyPhone: optionalStr(body.emergencyPhone),
-    roketAccountName: optionalStr(body.roketAccountName),
+    emergencyName,
+    emergencyPhone,
+    roketAccountName,
     workStartDate,
     ktpPhotoUrl,
     kkPhotoUrl,

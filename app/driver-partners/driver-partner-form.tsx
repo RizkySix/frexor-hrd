@@ -74,14 +74,12 @@ type FormData = {
   kkNumber: string;
   npwp: string;
   ptkpStatus: string;
-  bpjsKesehatan: string;
-  statusKesehatan: string;
-  bpjsKetenagakerjaan: string;
   noRekening: string;
   phone: string;
   email: string;
   currentAddress: string;
   lastEducation: LastEducation | "";
+  emergencyName: string;
   emergencyPhone: string;
   roketAccountName: string;
   workStartDate: string;
@@ -100,14 +98,12 @@ const INITIAL_FORM_DATA: FormData = {
   kkNumber: "",
   npwp: "",
   ptkpStatus: "",
-  bpjsKesehatan: "",
-  statusKesehatan: "",
-  bpjsKetenagakerjaan: "",
   noRekening: "",
   phone: "",
   email: "",
   currentAddress: "",
   lastEducation: "",
+  emergencyName: "",
   emergencyPhone: "",
   roketAccountName: "",
   workStartDate: "",
@@ -132,7 +128,7 @@ const INITIAL_PHOTO_STATE: PhotoSlotState = {
 const STEPS = [
   { title: "Data Diri (Sesuai KTP)", shortLabel: "Data Diri" },
   { title: "Unggah Dokumen", shortLabel: "Dokumen" },
-  { title: "Data Pajak, BPJS & Rekening", shortLabel: "Pajak" },
+  { title: "Data Pajak & Rekening", shortLabel: "Pajak" },
   { title: "Kontak & Data Tambahan", shortLabel: "Kontak" },
 ];
 
@@ -146,6 +142,8 @@ function inputCls(hasError?: string | null): string {
       : "border-slate-300 focus:border-brand-500 focus:ring-brand-100"
   }`;
 }
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const labelCls = "block text-sm font-medium text-slate-800";
 const optionalTag = (
@@ -380,12 +378,29 @@ export function DriverPartnerForm() {
     if (formData.npwp.trim() && !isValidNpwp(formData.npwp)) {
       e.npwp = "NPWP harus 15 atau 16 digit angka.";
     }
+    if (!formData.ptkpStatus) e.ptkpStatus = "Status PTKP wajib dipilih.";
     return e;
   }
 
   function validateStep4(): Record<string, string> {
     const e: Record<string, string> = {};
     if (!formData.phone.trim()) e.phone = "Nomor telepon/HP wajib diisi.";
+    if (!formData.email.trim()) e.email = "Alamat email wajib diisi.";
+    else if (!EMAIL_RE.test(formData.email.trim())) {
+      e.email = "Format alamat email tidak valid.";
+    }
+    if (!formData.emergencyName.trim()) {
+      e.emergencyName = "Nama kerabat wajib diisi.";
+    }
+    if (!formData.emergencyPhone.trim()) {
+      e.emergencyPhone = "Nomor telepon kerabat wajib diisi.";
+    }
+    if (!formData.roketAccountName.trim()) {
+      e.roketAccountName = "Nama akun di Roket wajib diisi.";
+    }
+    if (!formData.workStartDate) {
+      e.workStartDate = "Tanggal mulai bekerja wajib diisi (boleh perkiraan).";
+    }
     return e;
   }
 
@@ -438,14 +453,12 @@ export function DriverPartnerForm() {
           kkNumber: formData.kkNumber,
           npwp: formData.npwp.trim(),
           ptkpStatus: formData.ptkpStatus,
-          bpjsKesehatan: formData.bpjsKesehatan.trim(),
-          statusKesehatan: formData.statusKesehatan.trim(),
-          bpjsKetenagakerjaan: formData.bpjsKetenagakerjaan.trim(),
           noRekening: formData.noRekening.trim(),
           phone: formData.phone.trim(),
           email: formData.email.trim(),
           currentAddress: formData.currentAddress.trim(),
           lastEducation: formData.lastEducation,
+          emergencyName: formData.emergencyName.trim(),
           emergencyPhone: formData.emergencyPhone.trim(),
           roketAccountName: formData.roketAccountName.trim(),
           workStartDate: formData.workStartDate,
@@ -855,60 +868,24 @@ export function DriverPartnerForm() {
 
         <div>
           <label htmlFor="dp-ptkpStatus" className={labelCls}>
-            Status PTKP {optionalTag}
+            Status PTKP
           </label>
           <select
             id="dp-ptkpStatus"
             value={formData.ptkpStatus}
             onChange={(e) => setField("ptkpStatus", e.target.value)}
-            className={`${inputCls()} bg-white`}
+            className={`${inputCls(errors.ptkpStatus)} bg-white`}
           >
-            <option value="">Belum diisi</option>
+            <option value="">Pilih status PTKP</option>
             {PTKP_OPTIONS.map((v) => (
               <option key={v} value={v}>
                 {v}
               </option>
             ))}
           </select>
-        </div>
-
-        <div>
-          <label htmlFor="dp-bpjsKesehatan" className={labelCls}>
-            BPJS Kesehatan {optionalTag}
-          </label>
-          <input
-            id="dp-bpjsKesehatan"
-            type="text"
-            value={formData.bpjsKesehatan}
-            onChange={(e) => setField("bpjsKesehatan", e.target.value)}
-            className={inputCls()}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="dp-statusKesehatan" className={labelCls}>
-            Status Kesehatan BPJS {optionalTag}
-          </label>
-          <input
-            id="dp-statusKesehatan"
-            type="text"
-            value={formData.statusKesehatan}
-            onChange={(e) => setField("statusKesehatan", e.target.value)}
-            className={inputCls()}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="dp-bpjsKetenagakerjaan" className={labelCls}>
-            BPJS Ketenagakerjaan {optionalTag}
-          </label>
-          <input
-            id="dp-bpjsKetenagakerjaan"
-            type="text"
-            value={formData.bpjsKetenagakerjaan}
-            onChange={(e) => setField("bpjsKetenagakerjaan", e.target.value)}
-            className={inputCls()}
-          />
+          {errors.ptkpStatus && (
+            <p className="mt-1.5 text-xs text-rose-600">{errors.ptkpStatus}</p>
+          )}
         </div>
 
         <div>
@@ -952,7 +929,7 @@ export function DriverPartnerForm() {
 
         <div>
           <label htmlFor="dp-email" className={labelCls}>
-            Alamat Email {optionalTag}
+            Alamat Email
           </label>
           <input
             id="dp-email"
@@ -960,8 +937,11 @@ export function DriverPartnerForm() {
             autoComplete="email"
             value={formData.email}
             onChange={(e) => setField("email", e.target.value)}
-            className={inputCls()}
+            className={inputCls(errors.email)}
           />
+          {errors.email && (
+            <p className="mt-1.5 text-xs text-rose-600">{errors.email}</p>
+          )}
         </div>
 
         <div>
@@ -1003,8 +983,24 @@ export function DriverPartnerForm() {
         </div>
 
         <div>
+          <label htmlFor="dp-emergencyName" className={labelCls}>
+            Nama Kerabat
+          </label>
+          <input
+            id="dp-emergencyName"
+            type="text"
+            value={formData.emergencyName}
+            onChange={(e) => setField("emergencyName", e.target.value)}
+            className={inputCls(errors.emergencyName)}
+          />
+          {errors.emergencyName && (
+            <p className="mt-1.5 text-xs text-rose-600">{errors.emergencyName}</p>
+          )}
+        </div>
+
+        <div>
           <label htmlFor="dp-emergencyPhone" className={labelCls}>
-            Nomor Telepon Kerabat {optionalTag}
+            Nomor Telepon Kerabat
           </label>
           <input
             id="dp-emergencyPhone"
@@ -1012,8 +1008,11 @@ export function DriverPartnerForm() {
             inputMode="tel"
             value={formData.emergencyPhone}
             onChange={(e) => setField("emergencyPhone", e.target.value)}
-            className={inputCls()}
+            className={inputCls(errors.emergencyPhone)}
           />
+          {errors.emergencyPhone && (
+            <p className="mt-1.5 text-xs text-rose-600">{errors.emergencyPhone}</p>
+          )}
           <p className="mt-1.5 text-xs text-slate-500">
             Kontak darurat jika Anda tidak bisa dihubungi.
           </p>
@@ -1021,28 +1020,37 @@ export function DriverPartnerForm() {
 
         <div>
           <label htmlFor="dp-roketAccountName" className={labelCls}>
-            Nama Akun di Roket {optionalTag}
+            Nama Akun di Roket
           </label>
           <input
             id="dp-roketAccountName"
             type="text"
             value={formData.roketAccountName}
             onChange={(e) => setField("roketAccountName", e.target.value)}
-            className={inputCls()}
+            className={inputCls(errors.roketAccountName)}
           />
+          {errors.roketAccountName && (
+            <p className="mt-1.5 text-xs text-rose-600">{errors.roketAccountName}</p>
+          )}
         </div>
 
         <div>
           <label htmlFor="dp-workStartDate" className={labelCls}>
-            Tanggal Mulai Bekerja di BST {optionalTag}
+            Tanggal Mulai Bekerja di BST
           </label>
           <input
             id="dp-workStartDate"
             type="date"
             value={formData.workStartDate}
             onChange={(e) => setField("workStartDate", e.target.value)}
-            className={inputCls()}
+            className={inputCls(errors.workStartDate)}
           />
+          {errors.workStartDate && (
+            <p className="mt-1.5 text-xs text-rose-600">{errors.workStartDate}</p>
+          )}
+          <p className="mt-1.5 text-xs text-slate-500">
+            Tidak apa-apa jika hanya perkiraan / seingat Anda saja.
+          </p>
         </div>
       </div>
     );
