@@ -254,7 +254,7 @@ export async function POST(request: Request) {
   const roketAccountName = str(body.roketAccountName);
   if (!roketAccountName) {
     return NextResponse.json(
-      { error: "Nama akun di Roket wajib diisi." },
+      { error: "Nama panggung wajib diisi." },
       { status: 400 },
     );
   }

@@ -85,7 +85,7 @@ const GROUPS: GroupDef[] = [
     fill: "FF595959",
     headerText: "FFFFFFFF",
     columns: [
-      { header: "Nama Akun Roket", width: 20 },
+      { header: "Nama Panggung", width: 20 },
       { header: "Tanggal Mulai Bekerja", width: 16 },
     ],
   },
