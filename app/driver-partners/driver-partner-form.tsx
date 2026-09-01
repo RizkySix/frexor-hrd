@@ -578,7 +578,6 @@ export function DriverPartnerForm() {
               id={inputId}
               type="file"
               accept="image/*"
-              capture="environment"
               disabled={state.status === "uploading"}
               onChange={(e) => handleFileInput(slot, e)}
               className="sr-only"
