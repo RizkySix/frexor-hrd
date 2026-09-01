@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ALLOWED_IMAGE_CONTENT_TYPES, uploadObject } from "@/lib/s3";
+import { normalizeDigits } from "@/lib/driver-partner-utils";
 
 const VALID_SLOTS = ["ktp", "kk", "npwp"];
 
@@ -30,6 +31,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "File tidak ditemukan." }, { status: 400 });
   }
 
+  // Used to name the stored file after the driver (e.g. "budi-santoso-KTP.jpg")
+  // instead of a random id — optional here, uploadObject() falls back to a
+  // random key if either is missing/invalid so a photo upload never blocks
+  // on this.
+  const fullNameRaw = form.get("fullName");
+  const fullName = typeof fullNameRaw === "string" ? fullNameRaw : "";
+  const nikRaw = form.get("nik");
+  const nikDigits = typeof nikRaw === "string" ? normalizeDigits(nikRaw) : "";
+
   if (!ALLOWED_IMAGE_CONTENT_TYPES.includes(file.type)) {
     return NextResponse.json(
       { error: "Format file harus JPG, PNG, WEBP, atau HEIC." },
@@ -46,7 +56,14 @@ export async function POST(request: Request) {
 
   try {
     const bytes = new Uint8Array(await file.arrayBuffer());
-    const { publicUrl } = await uploadObject(slot, file.name, file.type, bytes);
+    const { publicUrl } = await uploadObject(
+      slot,
+      fullName,
+      nikDigits,
+      file.name,
+      file.type,
+      bytes,
+    );
     return NextResponse.json({ publicUrl });
   } catch (error) {
     return NextResponse.json(

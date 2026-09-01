@@ -285,6 +285,8 @@ export function DriverPartnerForm() {
       const form = new FormData();
       form.append("slot", slot);
       form.append("file", compressed);
+      form.append("fullName", formData.fullName.trim());
+      form.append("nik", formData.nik.trim());
 
       const res = await fetch("/api/driver-partners/upload", {
         method: "POST",

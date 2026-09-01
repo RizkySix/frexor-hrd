@@ -150,3 +150,19 @@ export function isValidNpwp(raw: string): boolean {
   const digits = normalizeDigits(raw);
   return digits.length === 15 || digits.length === 16;
 }
+
+/**
+ * URL/filename-safe slug: lowercase, diacritics stripped, non-alphanumeric
+ * runs collapsed to a single hyphen. Used to build human-readable storage
+ * paths/filenames from a driver's name.
+ */
+export function slugify(raw: string): string {
+  const slug = raw
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+  return slug || "mitra";
+}

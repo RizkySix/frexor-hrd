@@ -1,10 +1,12 @@
-import { randomUUID } from "crypto";
+import { createHash, randomUUID } from "crypto";
 import {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
-import { ALLOWED_IMAGE_CONTENT_TYPES } from "@/lib/driver-partner-utils";
+import { ALLOWED_IMAGE_CONTENT_TYPES, slugify } from "@/lib/driver-partner-utils";
+
+const SLOT_LABELS: Record<string, string> = { ktp: "KTP", kk: "KK", npwp: "NPWP" };
 
 export { ALLOWED_IMAGE_CONTENT_TYPES };
 
@@ -36,6 +38,32 @@ function publicUrlFor(key: string): string {
   return `${base}/${bucket}/${key}`;
 }
 
+// Builds a per-driver folder + human-readable filename, e.g.
+// "driver-partners/i-gede-rizky-a1b2c3d4/i-gede-rizky-KTP.jpg" — easy to
+// recognize and download/manage from the DO Spaces console. The 8-char NIK
+// hash keeps the folder unique per person (name alone can collide) without
+// putting the real NIK digits in a public URL. Same name+NIK always maps to
+// the same path, so a driver resubmitting their form overwrites their own
+// old photos instead of leaving orphaned files behind.
+function driverPhotoKey(
+  slot: string,
+  fullName: string,
+  nikDigits: string,
+  ext: string,
+): string {
+  const slotLabel = SLOT_LABELS[slot] ?? slot.toUpperCase();
+  const nameSlug = fullName.trim() ? slugify(fullName) : "";
+
+  if (!nameSlug || nikDigits.length !== 16) {
+    // Fallback for callers that can't supply a name/NIK yet.
+    return `driver-partners/${slot}/${randomUUID()}.${ext}`;
+  }
+
+  const nikHash = createHash("sha256").update(nikDigits).digest("hex").slice(0, 8);
+  const folder = `${nameSlug}-${nikHash}`;
+  return `driver-partners/${folder}/${nameSlug}-${slotLabel}.${ext}`;
+}
+
 // Uploads through our own server rather than a presigned browser-direct PUT:
 // the DigitalOcean Space fronting this bucket has no working CORS policy for
 // cross-origin browser uploads (confirmed blocked even with a valid CORS
@@ -44,6 +72,8 @@ function publicUrlFor(key: string): string {
 // well under typical serverless request-body limits.
 export async function uploadObject(
   slot: string,
+  fullName: string,
+  nikDigits: string,
   originalFileName: string,
   contentType: string,
   body: Uint8Array,
@@ -53,7 +83,7 @@ export async function uploadObject(
   }
   const extMatch = originalFileName.match(/\.([a-zA-Z0-9]+)$/);
   const ext = extMatch ? extMatch[1].toLowerCase() : "jpg";
-  const key = `driver-partners/${slot}/${randomUUID()}.${ext}`;
+  const key = driverPhotoKey(slot, fullName, nikDigits, ext);
   const bucket = process.env.AWS_BUCKET ?? "";
 
   await getClient().send(
