@@ -137,7 +137,11 @@ export default function DriverPartnersPage() {
         <span className="font-medium text-slate-700">{PUBLIC_FORM_URL}</span>
       </p>
 
-      <div className="mt-6">
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        <div className="shrink-0 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+          Total Mitra:{" "}
+          <span className="font-semibold text-brand-700">{partners.length}</span>
+        </div>
         <input
           type="text"
           value={query}
