@@ -97,13 +97,19 @@ type FormData = {
   hasBpjsKes: boolean;
   bpjsKesNumber: string;
   // Step 5 — Lain-lain (section G)
+  qLegalIssueYes: boolean;
   qLegalIssue: string;
+  qTerminatedYes: boolean;
   qTerminated: string;
   qSmoking: boolean;
   qTattoo: boolean;
+  qSeriousIllnessYes: boolean;
   qSeriousIllness: string;
+  qAllergyYes: boolean;
   qAllergy: string;
+  qSkinLungDiseaseYes: boolean;
   qSkinLungDisease: string;
+  qHereditaryDiseaseYes: boolean;
   qHereditaryDisease: string;
   qPrevSupervisor: string;
   qStartDate: string;
@@ -144,13 +150,19 @@ const INITIAL_FORM_DATA: FormData = {
   bpjsTkNumber: "",
   hasBpjsKes: false,
   bpjsKesNumber: "",
+  qLegalIssueYes: false,
   qLegalIssue: "",
+  qTerminatedYes: false,
   qTerminated: "",
   qSmoking: false,
   qTattoo: false,
+  qSeriousIllnessYes: false,
   qSeriousIllness: "",
+  qAllergyYes: false,
   qAllergy: "",
+  qSkinLungDiseaseYes: false,
   qSkinLungDisease: "",
+  qHereditaryDiseaseYes: false,
   qHereditaryDisease: "",
   qPrevSupervisor: "",
   qStartDate: "",
@@ -509,6 +521,7 @@ export function InterviewForm() {
     if (!formData.appliedPosition.trim())
       e.appliedPosition = "Posisi yang dilamar wajib diisi.";
     if (!formData.fullName.trim()) e.fullName = "Nama lengkap wajib diisi.";
+    if (!formData.nickname.trim()) e.nickname = "Nama panggilan wajib diisi.";
     if (!formData.birthPlace.trim()) e.birthPlace = "Tempat lahir wajib diisi.";
     if (!formData.gender) e.gender = "Pilih jenis kelamin Anda.";
     if (!formData.bloodType) e.bloodType = "Pilih golongan darah Anda.";
@@ -522,12 +535,57 @@ export function InterviewForm() {
     return e;
   }
 
+  // Step 3 (Pendidikan) — at least one formal-education row.
+  function validateStep3(): Record<string, string> {
+    const e: Record<string, string> = {};
+    const hasFormal = formalEducation.some((r) => r.institution.trim());
+    if (!hasFormal)
+      e.formalEducation = "Isi minimal 1 riwayat pendidikan formal (nama institusi).";
+    return e;
+  }
+
+  // Step 4 (Pengalaman) — at least one work row + BPJS numbers when applicable.
+  function validateStep4(): Record<string, string> {
+    const e: Record<string, string> = {};
+    const hasWork = workExperience.some((r) => r.company.trim() || r.position.trim());
+    if (!hasWork)
+      e.workExperience = "Isi minimal 1 riwayat pengalaman kerja (nama perusahaan/jabatan).";
+    if (formData.hasBpjsTk && !formData.bpjsTkNumber.trim())
+      e.bpjsTkNumber = "No. BPJS Ketenagakerjaan wajib diisi.";
+    if (formData.hasBpjsKes && !formData.bpjsKesNumber.trim())
+      e.bpjsKesNumber = "No. BPJS Kesehatan wajib diisi.";
+    return e;
+  }
+
+  // Step 5 (Lain-lain) — explanation required when a Yes/No question is Yes;
+  // questions 10 & 11 always required.
+  function validateStep5(): Record<string, string> {
+    const e: Record<string, string> = {};
+    if (formData.qLegalIssueYes && !formData.qLegalIssue.trim())
+      e.qLegalIssue = "Penjelasan wajib diisi.";
+    if (formData.qTerminatedYes && !formData.qTerminated.trim())
+      e.qTerminated = "Penjelasan wajib diisi.";
+    if (formData.qSeriousIllnessYes && !formData.qSeriousIllness.trim())
+      e.qSeriousIllness = "Penjelasan wajib diisi.";
+    if (formData.qAllergyYes && !formData.qAllergy.trim())
+      e.qAllergy = "Penjelasan wajib diisi.";
+    if (formData.qSkinLungDiseaseYes && !formData.qSkinLungDisease.trim())
+      e.qSkinLungDisease = "Penjelasan wajib diisi.";
+    if (formData.qHereditaryDiseaseYes && !formData.qHereditaryDisease.trim())
+      e.qHereditaryDisease = "Penjelasan wajib diisi.";
+    if (!formData.qStartDate.trim())
+      e.qStartDate = "Pertanyaan ini wajib diisi.";
+    if (!formData.qOrganization.trim())
+      e.qOrganization = "Pertanyaan ini wajib diisi.";
+    return e;
+  }
+
   const STEP_VALIDATORS: (() => Record<string, string>)[] = [
     validateStep1,
     () => ({}),
-    () => ({}),
-    () => ({}),
-    () => ({}),
+    validateStep3,
+    validateStep4,
+    validateStep5,
   ];
 
   function goToStep(index: number) {
@@ -554,14 +612,18 @@ export function InterviewForm() {
   }
 
   async function handleSubmit() {
-    // Re-check the required (step 1) fields before sending.
-    const stepErrors = validateStep1();
-    if (Object.keys(stepErrors).length > 0) {
-      setErrors(stepErrors);
-      setCurrentStep(0);
-      setSubmitError("Lengkapi data wajib pada langkah pertama terlebih dahulu.");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
+    // Re-check every step's required fields before sending; jump to the first
+    // step that still has an error.
+    for (let i = 0; i < STEP_VALIDATORS.length; i++) {
+      const stepErrors = STEP_VALIDATORS[i]();
+      if (Object.keys(stepErrors).length > 0) {
+        setErrors(stepErrors);
+        setCurrentStep(i);
+        setHighestStep((h) => Math.max(h, i));
+        setSubmitError("Masih ada data wajib yang belum lengkap. Mohon dilengkapi.");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
     }
 
     setSubmitting(true);
@@ -608,13 +670,19 @@ export function InterviewForm() {
           bpjsTkNumber: formData.bpjsTkNumber.trim(),
           hasBpjsKes: formData.hasBpjsKes,
           bpjsKesNumber: formData.bpjsKesNumber.trim(),
+          qLegalIssueYes: formData.qLegalIssueYes,
           qLegalIssue: formData.qLegalIssue.trim(),
+          qTerminatedYes: formData.qTerminatedYes,
           qTerminated: formData.qTerminated.trim(),
           qSmoking: formData.qSmoking,
           qTattoo: formData.qTattoo,
+          qSeriousIllnessYes: formData.qSeriousIllnessYes,
           qSeriousIllness: formData.qSeriousIllness.trim(),
+          qAllergyYes: formData.qAllergyYes,
           qAllergy: formData.qAllergy.trim(),
+          qSkinLungDiseaseYes: formData.qSkinLungDiseaseYes,
           qSkinLungDisease: formData.qSkinLungDisease.trim(),
+          qHereditaryDiseaseYes: formData.qHereditaryDiseaseYes,
           qHereditaryDisease: formData.qHereditaryDisease.trim(),
           qPrevSupervisor: formData.qPrevSupervisor.trim(),
           qStartDate: formData.qStartDate.trim(),
@@ -763,6 +831,44 @@ export function InterviewForm() {
     );
   }
 
+  // Section-G question with a Ya/Tidak toggle; when "Ya", a required
+  // explanation textarea appears below.
+  function gYesNoQuestion(
+    yesKey: keyof FormData,
+    textKey: keyof FormData,
+    label: string,
+    explainLabel = "Jelaskan",
+  ) {
+    const isYes = formData[yesKey] as boolean;
+    const textId = `iv-${String(textKey)}`;
+    return (
+      <div>
+        {yesNoToggle(yesKey, label)}
+        {isYes && (
+          <div className="mt-3">
+            <label htmlFor={textId} className={labelCls}>
+              {explainLabel} <span className="text-rose-500">*</span>
+            </label>
+            <textarea
+              id={textId}
+              rows={3}
+              value={formData[textKey] as string}
+              onChange={(e) =>
+                setField(textKey, e.target.value as FormData[typeof textKey])
+              }
+              className={inputCls(errors[String(textKey)])}
+            />
+            {errors[String(textKey)] && (
+              <p className="mt-1.5 text-xs text-rose-600">
+                {errors[String(textKey)]}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   // ── STEP 1 ───────────────────────────────────────────────────────────────────
   function renderStep1() {
     return (
@@ -836,7 +942,7 @@ export function InterviewForm() {
         </div>
 
         {textField("fullName", "Nama Lengkap", { required: true })}
-        {textField("nickname", "Nama Panggilan")}
+        {textField("nickname", "Nama Panggilan", { required: true })}
         {textField("birthPlace", "Tempat Lahir", { required: true })}
 
         <div>
@@ -1220,11 +1326,17 @@ export function InterviewForm() {
     return (
       <div className="space-y-6">
         <p className="text-xs leading-relaxed text-slate-500">
-          Semua kolom opsional. Tambahkan baris sesuai kebutuhan.
+          Pendidikan Formal wajib diisi minimal 1 baris. Bagian lain opsional —
+          tambahkan baris sesuai kebutuhan.
         </p>
+        {errors.formalEducation && (
+          <p className="rounded-md bg-rose-50 px-3 py-2 text-xs text-rose-700">
+            {errors.formalEducation}
+          </p>
+        )}
 
         {tableShell(
-          "Pendidikan Formal",
+          "Pendidikan Formal *",
           () => addRow(setFormalEducation, emptyFormalRow),
           formalEducation.map((row, i) =>
             rowCard(
@@ -1442,11 +1554,17 @@ export function InterviewForm() {
     return (
       <div className="space-y-6">
         <p className="text-xs leading-relaxed text-slate-500">
-          Semua kolom opsional. Tambahkan baris untuk setiap pengalaman kerja.
+          Pengalaman Kerja wajib diisi minimal 1 baris. Tambahkan baris untuk
+          setiap pengalaman kerja.
         </p>
+        {errors.workExperience && (
+          <p className="rounded-md bg-rose-50 px-3 py-2 text-xs text-rose-700">
+            {errors.workExperience}
+          </p>
+        )}
 
         {tableShell(
-          "Pengalaman Kerja",
+          "Pengalaman Kerja *",
           () => addRow(setWorkExperience, emptyWorkRow),
           workExperience.map((row, i) =>
             rowCard(
@@ -1575,7 +1693,10 @@ export function InterviewForm() {
             "Apakah Anda memiliki Kartu BPJS Ketenagakerjaan?",
           )}
           {formData.hasBpjsTk &&
-            textField("bpjsTkNumber", "No. BPJS TK", { inputMode: "numeric" })}
+            textField("bpjsTkNumber", "No. BPJS TK", {
+              inputMode: "numeric",
+              required: true,
+            })}
         </div>
 
         <div className="space-y-3 rounded-xl border border-slate-200 p-4">
@@ -1586,6 +1707,7 @@ export function InterviewForm() {
           {formData.hasBpjsKes &&
             textField("bpjsKesNumber", "No. BPJS Kesehatan", {
               inputMode: "numeric",
+              required: true,
             })}
         </div>
       </div>
@@ -1597,44 +1719,54 @@ export function InterviewForm() {
     return (
       <div className="space-y-5">
         <p className="text-xs leading-relaxed text-slate-500">
-          Semua pertanyaan opsional, namun mohon diisi sejujur-jujurnya.
+          Mohon diisi sejujur-jujurnya. Untuk pertanyaan yang dijawab{" "}
+          <strong>Ya</strong>, wajib diisi penjelasannya.
         </p>
 
-        {textareaField(
+        {gYesNoQuestion(
+          "qLegalIssueYes",
           "qLegalIssue",
-          "1. Pernah terlibat masalah hukum hingga proses pengadilan? Jelaskan.",
+          "1. Pernah terlibat masalah hukum hingga proses pengadilan?",
         )}
-        {textareaField(
+        {gYesNoQuestion(
+          "qTerminatedYes",
           "qTerminated",
-          "2. Pernah diberhentikan / diskorsing dari tempat kerja? Jelaskan.",
+          "2. Pernah diberhentikan / diskorsing dari tempat kerja?",
         )}
         {yesNoToggle("qSmoking", "3. Apakah Anda merokok?")}
         {yesNoToggle("qTattoo", "4. Apakah Anda bertatto?")}
-        {textareaField(
+        {gYesNoQuestion(
+          "qSeriousIllnessYes",
           "qSeriousIllness",
-          "5. Pernah sakit serius / kecelakaan / operasi dalam 5 tahun terakhir? Bila ya, jelaskan.",
+          "5. Pernah sakit serius / kecelakaan / operasi dalam 5 tahun terakhir?",
         )}
-        {textareaField(
+        {gYesNoQuestion(
+          "qAllergyYes",
           "qAllergy",
-          "6. Memiliki alergi atau riwayat penyakit kambuhan? Bila ya, sebutkan.",
+          "6. Memiliki alergi atau riwayat penyakit kambuhan?",
+          "Sebutkan",
         )}
-        {textareaField(
+        {gYesNoQuestion(
+          "qSkinLungDiseaseYes",
           "qSkinLungDisease",
-          "7. Memiliki penyakit kulit dan/atau paru-paru? Jelaskan.",
+          "7. Memiliki penyakit kulit dan/atau paru-paru?",
         )}
-        {textareaField(
+        {gYesNoQuestion(
+          "qHereditaryDiseaseYes",
           "qHereditaryDisease",
-          "8. Memiliki penyakit bawaan / keturunan dari keluarga? Bila ya, jelaskan.",
+          "8. Memiliki penyakit bawaan / keturunan dari keluarga?",
         )}
         {textareaField(
           "qPrevSupervisor",
           "9. Nama & no. HP atasan di tempat kerja sebelumnya (untuk referensi).",
           2,
         )}
-        {textField("qStartDate", "10. Kapan Anda dapat mulai bekerja?")}
+        {textField("qStartDate", "10. Kapan Anda dapat mulai bekerja?", {
+          required: true,
+        })}
         {textareaField(
           "qOrganization",
-          "11. Pernah mengikuti organisasi di tempat kerja atau rumah? Jelaskan.",
+          "11. Pernah mengikuti organisasi di tempat kerja atau rumah? (wajib diisi)",
         )}
         {textareaField(
           "qEmergencyContact",

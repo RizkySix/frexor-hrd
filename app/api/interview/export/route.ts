@@ -40,6 +40,11 @@ function dash(v: string | null | undefined): string {
 function yesNo(v: boolean): string {
   return v ? "Ya" : "Tidak";
 }
+function yesNoText(yes: boolean, text: string | null): string {
+  if (!yes) return "Tidak";
+  const t = (text ?? "").trim();
+  return t ? `Ya — ${t}` : "Ya";
+}
 function prof(p: Proficiency): string {
   return p ? PROFICIENCY_LABELS[p as Exclude<Proficiency, "">] : "-";
 }
@@ -333,14 +338,14 @@ export async function GET() {
       yesNo(p.hasBpjsKes),
       dash(p.bpjsKesNumber),
       // Lain-lain
-      dash(p.qLegalIssue),
-      dash(p.qTerminated),
+      yesNoText(p.qLegalIssueYes, p.qLegalIssue),
+      yesNoText(p.qTerminatedYes, p.qTerminated),
       yesNo(p.qSmoking),
       yesNo(p.qTattoo),
-      dash(p.qSeriousIllness),
-      dash(p.qAllergy),
-      dash(p.qSkinLungDisease),
-      dash(p.qHereditaryDisease),
+      yesNoText(p.qSeriousIllnessYes, p.qSeriousIllness),
+      yesNoText(p.qAllergyYes, p.qAllergy),
+      yesNoText(p.qSkinLungDiseaseYes, p.qSkinLungDisease),
+      yesNoText(p.qHereditaryDiseaseYes, p.qHereditaryDisease),
       dash(p.qPrevSupervisor),
       dash(p.qStartDate),
       dash(p.qOrganization),

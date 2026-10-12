@@ -308,21 +308,28 @@ model InterviewSubmission {
   hasBpjsKes         Boolean       @default(false)
   bpjsKesNumber      String?
 
-  // G. Lain-lain
-  qLegalIssue        String?       @db.Text
-  qTerminated        String?       @db.Text
-  qSmoking           Boolean       @default(false)
-  qTattoo            Boolean       @default(false)
-  qSeriousIllness    String?       @db.Text
-  qAllergy           String?       @db.Text
-  qSkinLungDisease   String?       @db.Text
-  qHereditaryDisease String?       @db.Text
-  qPrevSupervisor    String?       @db.Text
-  qStartDate         String?
-  qOrganization      String?       @db.Text
-  qEmergencyContact  String?       @db.Text
-  qRelativeInCompany String?       @db.Text
-  qWorkedAtBst       String?       @db.Text
+  // G. Lain-lain — questions 1,2,5,6,7,8 carry a Yes/No flag plus an
+  // explanation (required only when the flag is Yes).
+  qLegalIssueYes        Boolean    @default(false)
+  qLegalIssue           String?    @db.Text
+  qTerminatedYes        Boolean    @default(false)
+  qTerminated           String?    @db.Text
+  qSmoking              Boolean    @default(false)
+  qTattoo               Boolean    @default(false)
+  qSeriousIllnessYes    Boolean    @default(false)
+  qSeriousIllness       String?    @db.Text
+  qAllergyYes           Boolean    @default(false)
+  qAllergy              String?    @db.Text
+  qSkinLungDiseaseYes   Boolean    @default(false)
+  qSkinLungDisease      String?    @db.Text
+  qHereditaryDiseaseYes Boolean    @default(false)
+  qHereditaryDisease    String?    @db.Text
+  qPrevSupervisor       String?    @db.Text
+  qStartDate            String?
+  qOrganization         String?    @db.Text
+  qEmergencyContact     String?    @db.Text
+  qRelativeInCompany    String?    @db.Text
+  qWorkedAtBst          String?    @db.Text
 
   submittedAt        DateTime      @default(now())
   updatedAt          DateTime      @updatedAt

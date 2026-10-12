@@ -69,6 +69,10 @@ export async function POST(request: Request) {
   if (!fullName) {
     return NextResponse.json({ error: "Nama lengkap wajib diisi." }, { status: 400 });
   }
+  const nickname = str(body.nickname);
+  if (!nickname) {
+    return NextResponse.json({ error: "Nama panggilan wajib diisi." }, { status: 400 });
+  }
   const birthPlace = str(body.birthPlace);
   if (!birthPlace) {
     return NextResponse.json({ error: "Tempat lahir wajib diisi." }, { status: 400 });
@@ -170,13 +174,83 @@ export async function POST(request: Request) {
     }))
     .filter((r) => r.company || r.position);
 
+  // At least one formal-education row and one work-experience row.
+  if (formalEducation.length === 0) {
+    return NextResponse.json(
+      { error: "Minimal 1 riwayat pendidikan formal wajib diisi." },
+      { status: 400 },
+    );
+  }
+  if (workExperience.length === 0) {
+    return NextResponse.json(
+      { error: "Minimal 1 riwayat pengalaman kerja wajib diisi." },
+      { status: 400 },
+    );
+  }
+
+  // BPJS numbers required when the applicant has the card.
+  const hasBpjsTk = bool(body.hasBpjsTk);
+  const bpjsTkNumber = str(body.bpjsTkNumber);
+  if (hasBpjsTk && !bpjsTkNumber) {
+    return NextResponse.json(
+      { error: "No. BPJS Ketenagakerjaan wajib diisi." },
+      { status: 400 },
+    );
+  }
+  const hasBpjsKes = bool(body.hasBpjsKes);
+  const bpjsKesNumber = str(body.bpjsKesNumber);
+  if (hasBpjsKes && !bpjsKesNumber) {
+    return NextResponse.json(
+      { error: "No. BPJS Kesehatan wajib diisi." },
+      { status: 400 },
+    );
+  }
+
+  // Section G: questions 1,2,5,6,7,8 carry a Yes/No flag; when Yes, the
+  // explanation is required. Questions 10 & 11 are always required.
+  const gYesNo: {
+    yes: boolean;
+    text: string;
+    label: string;
+  }[] = [
+    { yes: bool(body.qLegalIssueYes), text: str(body.qLegalIssue), label: "masalah hukum" },
+    { yes: bool(body.qTerminatedYes), text: str(body.qTerminated), label: "pernah diberhentikan/diskorsing" },
+    { yes: bool(body.qSeriousIllnessYes), text: str(body.qSeriousIllness), label: "sakit serius/kecelakaan/operasi" },
+    { yes: bool(body.qAllergyYes), text: str(body.qAllergy), label: "alergi/penyakit kambuhan" },
+    { yes: bool(body.qSkinLungDiseaseYes), text: str(body.qSkinLungDisease), label: "penyakit kulit/paru-paru" },
+    { yes: bool(body.qHereditaryDiseaseYes), text: str(body.qHereditaryDisease), label: "penyakit bawaan/keturunan" },
+  ];
+  for (const q of gYesNo) {
+    if (q.yes && !q.text) {
+      return NextResponse.json(
+        { error: `Penjelasan untuk pertanyaan "${q.label}" wajib diisi.` },
+        { status: 400 },
+      );
+    }
+  }
+
+  const qStartDate = str(body.qStartDate);
+  if (!qStartDate) {
+    return NextResponse.json(
+      { error: "Pertanyaan no. 10 (kapan dapat mulai bekerja) wajib diisi." },
+      { status: 400 },
+    );
+  }
+  const qOrganization = str(body.qOrganization);
+  if (!qOrganization) {
+    return NextResponse.json(
+      { error: "Pertanyaan no. 11 (organisasi) wajib diisi." },
+      { status: 400 },
+    );
+  }
+
   try {
     await prisma.interviewSubmission.create({
       data: {
         appliedPosition,
         photoUrl: optStr(body.photoUrl),
         fullName,
-        nickname: optStr(body.nickname),
+        nickname,
         birthPlace,
         birthDate: parseDate(body.birthDate),
         gender: gender as DriverGender,
@@ -206,21 +280,27 @@ export async function POST(request: Request) {
         lastJobDescription: optStr(body.lastJobDescription),
         lastSalaryTotal: optStr(body.lastSalaryTotal),
         expectedSalary: optStr(body.expectedSalary),
-        hasBpjsTk: bool(body.hasBpjsTk),
-        bpjsTkNumber: optStr(body.bpjsTkNumber),
-        hasBpjsKes: bool(body.hasBpjsKes),
-        bpjsKesNumber: optStr(body.bpjsKesNumber),
-        qLegalIssue: optStr(body.qLegalIssue),
-        qTerminated: optStr(body.qTerminated),
+        hasBpjsTk,
+        bpjsTkNumber: hasBpjsTk ? bpjsTkNumber : null,
+        hasBpjsKes,
+        bpjsKesNumber: hasBpjsKes ? bpjsKesNumber : null,
+        qLegalIssueYes: gYesNo[0].yes,
+        qLegalIssue: gYesNo[0].yes ? gYesNo[0].text : null,
+        qTerminatedYes: gYesNo[1].yes,
+        qTerminated: gYesNo[1].yes ? gYesNo[1].text : null,
         qSmoking: bool(body.qSmoking),
         qTattoo: bool(body.qTattoo),
-        qSeriousIllness: optStr(body.qSeriousIllness),
-        qAllergy: optStr(body.qAllergy),
-        qSkinLungDisease: optStr(body.qSkinLungDisease),
-        qHereditaryDisease: optStr(body.qHereditaryDisease),
+        qSeriousIllnessYes: gYesNo[2].yes,
+        qSeriousIllness: gYesNo[2].yes ? gYesNo[2].text : null,
+        qAllergyYes: gYesNo[3].yes,
+        qAllergy: gYesNo[3].yes ? gYesNo[3].text : null,
+        qSkinLungDiseaseYes: gYesNo[4].yes,
+        qSkinLungDisease: gYesNo[4].yes ? gYesNo[4].text : null,
+        qHereditaryDiseaseYes: gYesNo[5].yes,
+        qHereditaryDisease: gYesNo[5].yes ? gYesNo[5].text : null,
         qPrevSupervisor: optStr(body.qPrevSupervisor),
-        qStartDate: optStr(body.qStartDate),
-        qOrganization: optStr(body.qOrganization),
+        qStartDate,
+        qOrganization,
         qEmergencyContact: optStr(body.qEmergencyContact),
         qRelativeInCompany: optStr(body.qRelativeInCompany),
         qWorkedAtBst: optStr(body.qWorkedAtBst),

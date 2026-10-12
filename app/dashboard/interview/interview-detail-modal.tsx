@@ -37,6 +37,13 @@ function yesNo(value: boolean): string {
   return value ? "Ya" : "Tidak";
 }
 
+// For section-G questions carrying a Yes/No flag + explanation.
+function yesNoWithText(yes: boolean, text: string | null | undefined): string {
+  if (!yes) return "Tidak";
+  const t = (text ?? "").trim();
+  return t ? `Ya — ${t}` : "Ya";
+}
+
 function labelFrom<K extends string>(
   map: Record<K, string>,
   value: string | null | undefined,
@@ -249,35 +256,35 @@ export function InterviewDetailModal({ submission, onClose }: Props) {
           <Section title="G. Lain-lain">
             <Fields>
               <Field
-                label="Apakah Anda pernah terlibat masalah hukum?"
-                value={display(submission.qLegalIssue)}
+                label="1. Pernah terlibat masalah hukum hingga pengadilan?"
+                value={yesNoWithText(submission.qLegalIssueYes, submission.qLegalIssue)}
                 full
               />
               <Field
-                label="Apakah Anda pernah diberhentikan/PHK dari pekerjaan sebelumnya?"
-                value={display(submission.qTerminated)}
+                label="2. Pernah diberhentikan/diskorsing dari tempat kerja?"
+                value={yesNoWithText(submission.qTerminatedYes, submission.qTerminated)}
                 full
               />
-              <Field label="Apakah Anda merokok?" value={yesNo(submission.qSmoking)} />
-              <Field label="Apakah Anda memiliki tato?" value={yesNo(submission.qTattoo)} />
+              <Field label="3. Apakah Anda merokok?" value={yesNo(submission.qSmoking)} />
+              <Field label="4. Apakah Anda bertatto?" value={yesNo(submission.qTattoo)} />
               <Field
-                label="Apakah Anda pernah menderita penyakit serius?"
-                value={display(submission.qSeriousIllness)}
-                full
-              />
-              <Field
-                label="Apakah Anda memiliki alergi?"
-                value={display(submission.qAllergy)}
+                label="5. Pernah sakit serius/kecelakaan/operasi (5 th terakhir)?"
+                value={yesNoWithText(submission.qSeriousIllnessYes, submission.qSeriousIllness)}
                 full
               />
               <Field
-                label="Apakah Anda memiliki penyakit kulit atau paru-paru?"
-                value={display(submission.qSkinLungDisease)}
+                label="6. Memiliki alergi atau penyakit kambuhan?"
+                value={yesNoWithText(submission.qAllergyYes, submission.qAllergy)}
                 full
               />
               <Field
-                label="Apakah Anda memiliki penyakit keturunan?"
-                value={display(submission.qHereditaryDisease)}
+                label="7. Memiliki penyakit kulit dan/atau paru-paru?"
+                value={yesNoWithText(submission.qSkinLungDiseaseYes, submission.qSkinLungDisease)}
+                full
+              />
+              <Field
+                label="8. Memiliki penyakit bawaan/keturunan dari keluarga?"
+                value={yesNoWithText(submission.qHereditaryDiseaseYes, submission.qHereditaryDisease)}
                 full
               />
               <Field
