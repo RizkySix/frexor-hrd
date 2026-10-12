@@ -17,6 +17,11 @@ const tabs = [
     label: "Data Mitra",
     match: /^\/dashboard\/driver-partners.*$/,
   },
+  {
+    href: "/dashboard/interview",
+    label: "Interview",
+    match: /^\/dashboard\/interview.*$/,
+  },
 ];
 
 export function DashboardTabs() {

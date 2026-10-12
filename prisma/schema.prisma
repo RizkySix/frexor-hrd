@@ -248,3 +248,84 @@ model DriverPartner {
 
   @@index([submittedAt])
 }
+
+// Interview form (FO-HR.SUN-008/FI). Public applicants fill a shareable link;
+// HRD reviews/exports from the dashboard. Repeating sections (family members,
+// education rows, languages, work history) are stored as JSON arrays since
+// they are captured-and-displayed rather than queried individually — same
+// approach the survey feature uses for its nested answer data.
+model InterviewSubmission {
+  id                 String        @id @default(cuid())
+
+  // Header
+  appliedPosition    String
+  photoUrl           String?
+
+  // A. Identitas
+  fullName           String
+  nickname           String?
+  birthPlace         String
+  birthDate          DateTime?
+  gender             DriverGender
+  heightCm           String?
+  weightKg           String?
+  bloodType          BloodType
+  ktpAddress         String        @db.Text
+  homePhone          String?
+  currentAddress     String?       @db.Text
+  bcaAccount         String?
+  citizenship        String?
+  personalEmail      String?
+  maritalStatus      MaritalStatus
+  childrenCount      Int?
+  religion           Religion
+  nik                String
+  phone              String
+  simA               String?
+  simB               String?
+  simC               String?
+
+  // B. Data Keluarga (JSON: FamilyMember[])
+  familyImmediate    Json?
+  familyExtended     Json?
+
+  // C. Pendidikan Formal (JSON: FormalEducationRow[])
+  formalEducation    Json?
+
+  // D. Pendidikan Non-Formal (JSON: NonFormalEducationRow[])
+  nonFormalEducation Json?
+
+  // E. Penguasaan Bahasa Asing (JSON: LanguageRow[])
+  languages          Json?
+
+  // F. Pengalaman Kerja (JSON: WorkExperienceRow[])
+  workExperience     Json?
+  lastJobDescription String?       @db.Text
+  lastSalaryTotal    String?
+  expectedSalary     String?
+  hasBpjsTk          Boolean       @default(false)
+  bpjsTkNumber       String?
+  hasBpjsKes         Boolean       @default(false)
+  bpjsKesNumber      String?
+
+  // G. Lain-lain
+  qLegalIssue        String?       @db.Text
+  qTerminated        String?       @db.Text
+  qSmoking           Boolean       @default(false)
+  qTattoo            Boolean       @default(false)
+  qSeriousIllness    String?       @db.Text
+  qAllergy           String?       @db.Text
+  qSkinLungDisease   String?       @db.Text
+  qHereditaryDisease String?       @db.Text
+  qPrevSupervisor    String?       @db.Text
+  qStartDate         String?
+  qOrganization      String?       @db.Text
+  qEmergencyContact  String?       @db.Text
+  qRelativeInCompany String?       @db.Text
+  qWorkedAtBst       String?       @db.Text
+
+  submittedAt        DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@index([submittedAt])
+}

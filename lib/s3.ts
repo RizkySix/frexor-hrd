@@ -99,6 +99,38 @@ export async function uploadObject(
   return { publicUrl: publicUrlFor(key) };
 }
 
+// Interview applicant photo (the "foto 4x6" box on the form). Grouped in an
+// "interview/" prefix with a name-based, human-readable filename plus a short
+// random suffix so the console stays browsable and re-picks never collide.
+export async function uploadInterviewPhoto(
+  fullName: string,
+  originalFileName: string,
+  contentType: string,
+  body: Uint8Array,
+): Promise<{ publicUrl: string }> {
+  if (!s3Enabled()) {
+    throw new Error("Penyimpanan file belum diaktifkan di server (AWS_STORAGE_ENABLED).");
+  }
+  const extMatch = originalFileName.match(/\.([a-zA-Z0-9]+)$/);
+  const ext = extMatch ? extMatch[1].toLowerCase() : "jpg";
+  const nameSlug = fullName.trim() ? slugify(fullName) : "pelamar";
+  const rand = randomUUID().slice(0, 8);
+  const key = `interview/${nameSlug}-${rand}/${nameSlug}-foto.${ext}`;
+  const bucket = process.env.AWS_BUCKET ?? "";
+
+  await getClient().send(
+    new PutObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      Body: body,
+      ContentType: contentType,
+      ACL: "public-read",
+    }),
+  );
+
+  return { publicUrl: publicUrlFor(key) };
+}
+
 // Best-effort delete by public URL — derives the object key from the URL
 // path (everything after the bucket/prefix segment). Never throws; a
 // missing/already-deleted object should never block the caller.
