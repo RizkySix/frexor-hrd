@@ -179,6 +179,14 @@ export default function InterviewPage() {
                           >
                             Lihat Detail
                           </button>
+                          <a
+                            href={`/print/interview/${s.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="rounded-md border border-brand-500 bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-700 transition hover:bg-brand-100"
+                          >
+                            PDF
+                          </a>
                           <button
                             onClick={() => handleDelete(s.id, s.fullName)}
                             disabled={deletingId === s.id}
